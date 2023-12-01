@@ -1,0 +1,73 @@
+# примеры API-запросов
+
+@baseUrl = http://localhost:8000
+
+# создание продукта
+POST {{baseUrl}}/products/
+Content-Type: application/json
+
+{
+  "name": "Помидор",
+  "desc": "Лучшие помидоры на рынке"
+}
+
+###
+
+# получение продуктов
+GET {{baseUrl}}/products/
+Content-Type: application/json
+
+###
+
+# обновление продукта
+PATCH {{baseUrl}}/products/1/
+Content-Type: application/json
+
+{
+  "desc": "Самые сочные и ароматные помидорки"
+}
+
+###
+
+# удаление продукта
+DELETE {{baseUrl}}/products/1/
+Content-Type: application/json
+
+###
+
+# поиск продуктов по названию и описанию
+GET {{baseUrl}}/products/?search=помидор
+Content-Type: application/json
+
+###
+
+# создание склада
+POST {{baseUrl}}/warehouses/
+Content-Type: application/json
+
+{
+    "name": "A name",
+    "products": {
+        "2": 120,
+        "3": 180
+    }
+}
+
+###
+
+# обновляем записи на складе
+PATCH {{baseUrl}}/warehouses/4/
+Content-Type: application/json
+
+{
+  "products": {
+    "2": 130,
+    "3": 145
+  }
+}
+
+###
+
+# # поиск складов, где есть определенный продукт
+# GET {{baseUrl}}/stocks/?products=2
+# Content-Type: application/json
