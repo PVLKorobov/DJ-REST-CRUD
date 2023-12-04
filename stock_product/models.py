@@ -1,22 +1,35 @@
+from django.core.validators import MinValueValidator
 from django.db import models
-
-from datetime import datetime
 
 
 class Product(models.Model):
-    name = models.CharField(max_length=30, unique=True)
-    desc = models.CharField(max_length=400, blank=True)
+    title = models.CharField(max_length=60, unique=True)
+    description = models.TextField(null=True, blank=True)
 
-class Warehouse(models.Model):
-    name = models.CharField(max_length=30, unique=True)
 
 class Stock(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='stock')
-    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE, related_name='stock')
-    price = models.IntegerField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now_add=True)
+    address = models.CharField(max_length=200, unique=True)
+    products = models.ManyToManyField(
+        Product,
+        through='StockProduct',
+        related_name='stocks',
+    )
 
-    def save(self, *args, **kwargs):
-        self.updated_at = datetime.now()
-        super().save(*args, **kwargs)
+
+class StockProduct(models.Model):
+    stock = models.ForeignKey(
+        Stock,
+        on_delete=models.CASCADE,
+        related_name='positions',
+    )
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name='positions',
+    )
+    quantity = models.PositiveIntegerField(default=1)
+    price = models.DecimalField(
+        max_digits=18,
+        decimal_places=2,
+        validators=[MinValueValidator(0)],
+    )

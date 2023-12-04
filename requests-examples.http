@@ -1,14 +1,14 @@
 # примеры API-запросов
 
-@baseUrl = http://localhost:8000
+@baseUrl = http://localhost:8000/api/v1
 
 # создание продукта
 POST {{baseUrl}}/products/
 Content-Type: application/json
 
 {
-  "name": "Помидор",
-  "desc": "Лучшие помидоры на рынке"
+  "title": "Помидор",
+  "description": "Лучшие помидоры на рынке"
 }
 
 ###
@@ -24,7 +24,7 @@ PATCH {{baseUrl}}/products/1/
 Content-Type: application/json
 
 {
-  "desc": "Самые сочные и ароматные помидорки"
+  "description": "Самые сочные и ароматные помидорки"
 }
 
 ###
@@ -42,32 +42,48 @@ Content-Type: application/json
 ###
 
 # создание склада
-POST {{baseUrl}}/warehouses/
+POST {{baseUrl}}/stocks/
 Content-Type: application/json
 
 {
-    "name": "A name",
-    "products": {
-        "2": 120,
-        "3": 180
+  "address": "мой адрес не дом и не улица, мой адрес сегодня такой: www.ленинград-спб.ru3",
+  "positions": [
+    {
+      "product": 2,
+      "quantity": 250,
+      "price": 120.50
+    },
+    {
+      "product": 3,
+      "quantity": 100,
+      "price": 180
     }
+  ]
 }
 
 ###
 
 # обновляем записи на складе
-PATCH {{baseUrl}}/warehouses/4/
+PATCH {{baseUrl}}/stocks/4/
 Content-Type: application/json
 
 {
-  "products": {
-    "2": 130,
-    "3": 145
-  }
+  "positions": [
+    {
+      "product": 2,
+      "quantity": 100,
+      "price": 130.80
+    },
+    {
+      "product": 3,
+      "quantity": 243,
+      "price": 145
+    }
+  ]
 }
 
 ###
 
-# # поиск складов, где есть определенный продукт
-# GET {{baseUrl}}/stocks/?products=2
-# Content-Type: application/json
+# поиск складов, где есть определенный продукт
+GET {{baseUrl}}/stocks/?products=2
+Content-Type: application/json
