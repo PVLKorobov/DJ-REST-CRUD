@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from .models import Stock, Product
+from .models import Stock, Product, StockProduct
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -12,7 +12,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
 class ProductPositionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Stock
+        model = StockProduct
         fields = ['id', 'product', 'quantity', 'price']
 
 
@@ -21,14 +21,11 @@ class StockSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Stock
-        fields = ['id', 'name']
+        fields = ['id', 'address', 'positions']
 
 
     def create(self, validated_data):
-        positions = validated_data.pop('products')
-
-        if type(positions) != list:
-            raise ValidationError('Positions field must be a list')
+        positions = validated_data.pop('products', [])
         
         stock = super().create(validated_data)
 
@@ -38,23 +35,15 @@ class StockSerializer(serializers.ModelSerializer):
             if not product.exists():
                 raise ValidationError('Requested product does not exist')
             
-            stockRecord = Stock(product=product, stock=stock, price=position['price'])
-            stockRecord.save()
+            StockProduct.objects.create(stock=stock, product=product, price=position['price'], quantity=position['quantity'])
 
         return stock
     
 
     def update(self, instance, validated_data):
-        positions = validated_data.pop('products')
-
-        if type(positions) != list:
-            raise ValidationError('Positions field must be a list')
+        positions = validated_data.pop('products', [])
 
         stock = super().update(instance, validated_data)
-
-        stockList = stock.products.objects.all().filter(stock=stock)
-        for stock in stockList:
-            stock.delete()
 
         for position in positions:
             product = Product.objects.all().filter(id=position['product'])
@@ -62,7 +51,6 @@ class StockSerializer(serializers.ModelSerializer):
             if not product.exists():
                 raise ValidationError('Requested product does not exist')
             
-            stockRecord = Stock(product=product, stock=stock, price=position['price'])
-            stockRecord.save()
+            StockProduct.objects.update_or_create(stock=stock, product=product, price=position['price'], quantity=position['quantity'])
 
         return stock
