@@ -10,14 +10,7 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'description']
 
 
-class ProductPositionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = StockProduct
-        fields = ['id', 'product', 'quantity', 'price']
-
-
 class StockSerializer(serializers.ModelSerializer):
-    positions = ProductPositionSerializer(many=True)
 
     class Meta:
         model = Stock
@@ -30,10 +23,7 @@ class StockSerializer(serializers.ModelSerializer):
         stock = super().create(validated_data)
 
         for position in positions:
-            product = Product.objects.all().filter(id=position['product'])
-
-            if not product.exists():
-                raise ValidationError('Requested product does not exist')
+            product = position['product']
             
             StockProduct.objects.create(stock=stock, product=product, price=position['price'], quantity=position['quantity'])
 
@@ -51,6 +41,8 @@ class StockSerializer(serializers.ModelSerializer):
             if not product.exists():
                 raise ValidationError('Requested product does not exist')
             
-            StockProduct.objects.update_or_create(stock=stock, product=product, price=position['price'], quantity=position['quantity'])
+            StockProduct.objects.update_or_create(stock=stock, product=product,
+                                                  defaults={'price':position['price'],
+                                                            'quantity':position['quantity']})
 
         return stock
